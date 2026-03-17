@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using PatientService.Infrastructure.Data;
-
-
+using PatientService.Application.Interfaces;
+using PatientService.Infrastructure.Repositories;
+using PatientService.Application.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,14 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<PatientDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-    
+
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IPatientService, PatientAppService>();
+builder.Services.AddControllers(); 
+
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -41,6 +49,8 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+app.MapControllers();
 
 app.Run();
 
