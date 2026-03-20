@@ -1,0 +1,21 @@
+@model PatientFront.Models.PatientViewModel
+
+@{
+    ViewData["Title"] = "Détail du patient";
+}
+
+<h1>Détail du patient</h1>
+
+<div>
+    <p><strong>Id :</strong> @Model.Id</p>
+    <p><strong>Prénom :</strong> @Model.FirstName</p>
+    <p><strong>Nom :</strong> @Model.LastName</p>
+    <p><strong>Date de naissance :</strong> @Model.DateOfBirth.ToString("yyyy-MM-dd")</p>
+    <p><strong>Genre :</strong> @Model.Gender</p>
+    <p><strong>Adresse :</strong> @Model.Address</p>
+    <p><strong>Téléphone :</strong> @Model.Phone</p>
+</div>
+
+<p>
+    <a asp-controller="Patients" asp-action="Index">Retour à la liste</a>
+</p>

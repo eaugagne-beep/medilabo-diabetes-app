@@ -1,0 +1,44 @@
+@model List<PatientFront.Models.PatientViewModel>
+
+@{
+    ViewData["Title"] = "Liste des patients";
+}
+
+<h1>Liste des patients</h1>
+
+@if (!Model.Any())
+{
+    <p>Aucun patient trouvé.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Date de naissance</th>
+                <th>Genre</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var patient in Model)
+        {
+            <tr>
+                <td>@patient.Id</td>
+                <td>@patient.FirstName</td>
+                <td>@patient.LastName</td>
+                <td>@patient.DateOfBirth.ToString("yyyy-MM-dd")</td>
+                <td>@patient.Gender</td>
+                <td>
+                    <a asp-controller="Patients" asp-action="Details" asp-route-id="@patient.Id">
+                        Voir le détail
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

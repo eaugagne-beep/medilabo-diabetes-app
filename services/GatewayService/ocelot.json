@@ -10,7 +10,19 @@
         }
       ],
       "UpstreamPathTemplate": "/patients",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Patients/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5261
+        }
+      ],
+      "UpstreamPathTemplate": "/patients/{id}",
+      "UpstreamHttpMethod": [ "GET", "PUT" ]
     }
   ],
   "GlobalConfiguration": {
