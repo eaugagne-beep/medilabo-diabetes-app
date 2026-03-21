@@ -1,4 +1,5 @@
-@model PatientFront.Models.PatientViewModel
+@model PatientFront.Models.PatientDetailsViewModel
+
 
 @{
     ViewData["Title"] = "Détail du patient";
@@ -7,14 +8,32 @@
 <h1>Détail du patient</h1>
 
 <div>
-    <p><strong>Id :</strong> @Model.Id</p>
-    <p><strong>Prénom :</strong> @Model.FirstName</p>
-    <p><strong>Nom :</strong> @Model.LastName</p>
-    <p><strong>Date de naissance :</strong> @Model.DateOfBirth.ToString("yyyy-MM-dd")</p>
-    <p><strong>Genre :</strong> @Model.Gender</p>
-    <p><strong>Adresse :</strong> @Model.Address</p>
-    <p><strong>Téléphone :</strong> @Model.Phone</p>
+    <p><strong>Id :</strong> @Model.Patient.Id</p>
+    <p><strong>Prénom :</strong> @Model.Patient.FirstName</p>
+    <p><strong>Nom :</strong> @Model.Patient.LastName</p>
+    <p><strong>Date de naissance :</strong> @Model.Patient.DateOfBirth.ToString("yyyy-MM-dd")</p>
+    <p><strong>Genre :</strong> @Model.Patient.Gender</p>
+    <p><strong>Adresse :</strong> @Model.Patient.Address</p>
+    <p><strong>Téléphone :</strong> @Model.Patient.Phone</p>
 </div>
+
+<hr />
+
+<h2>Notes médicales</h2>
+
+@if (!Model.Notes.Any())
+{
+    <p>Aucune note pour ce patient.</p>
+}
+else
+{
+    <ul>
+        @foreach (var note in Model.Notes)
+        {
+            <li style="margin-bottom: 15px; white-space: pre-line;">@note.Note</li>
+        }
+    </ul>
+}
 
 <p>
     <a asp-controller="Patients" asp-action="Index">Retour à la liste</a>

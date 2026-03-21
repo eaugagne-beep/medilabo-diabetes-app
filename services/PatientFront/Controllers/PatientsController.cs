@@ -31,22 +31,45 @@ public class PatientsController : Controller
     }
 
     public async Task<IActionResult> Details(int id)
+{
+    // 1. Récupérer le patient (via Gateway)
+    var patientResponse = await _httpClient.GetAsync($"/patients/{id}");
+
+    if (!patientResponse.IsSuccessStatusCode)
     {
-        var response = await _httpClient.GetAsync($"/patients/{id}");
-
-        if (!response.IsSuccessStatusCode)
-        {
-            return NotFound();
-        }
-
-        var json = await response.Content.ReadAsStringAsync();
-        var patient = JsonConvert.DeserializeObject<PatientViewModel>(json);
-
-        if (patient == null)
-        {
-            return NotFound();
-        }
-
-        return View(patient);
+        return NotFound();
     }
+
+    var patientJson = await patientResponse.Content.ReadAsStringAsync();
+    var patient = JsonConvert.DeserializeObject<PatientViewModel>(patientJson);
+
+    if (patient == null)
+    {
+        return NotFound();
+    }
+
+    // 2. Récupérer les notes (via NoteService DIRECT)
+    var noteClient = new HttpClient();
+    noteClient.BaseAddress = new Uri("http://localhost:5148");
+
+    var notesResponse = await noteClient.GetAsync($"/api/notes/patient/{id}");
+
+    List<PatientNoteViewModel> notes = new();
+
+    if (notesResponse.IsSuccessStatusCode)
+    {
+        var notesJson = await notesResponse.Content.ReadAsStringAsync();
+        notes = JsonConvert.DeserializeObject<List<PatientNoteViewModel>>(notesJson)
+                ?? new List<PatientNoteViewModel>();
+    }
+
+    // 3. Construire le ViewModel
+    var viewModel = new PatientDetailsViewModel
+    {
+        Patient = patient,
+        Notes = notes
+    };
+
+    return View(viewModel);
+}
 }
