@@ -48,23 +48,19 @@ public class PatientsController : Controller
         return NotFound();
     }
 
-    // 2. Récupérer les notes (via NoteService DIRECT)
-    var noteClient = new HttpClient();
-    noteClient.BaseAddress = new Uri("http://localhost:5148");
+        var notesResponse = await _httpClient.GetAsync($"/notes/patient/{id}");
 
-    var notesResponse = await noteClient.GetAsync($"/api/notes/patient/{id}");
+        List<PatientNoteViewModel> notes = new();
 
-    List<PatientNoteViewModel> notes = new();
+        if (notesResponse.IsSuccessStatusCode)
+        {
+            var notesJson = await notesResponse.Content.ReadAsStringAsync();
+            notes = JsonConvert.DeserializeObject<List<PatientNoteViewModel>>(notesJson)
+                    ?? new List<PatientNoteViewModel>();
+        }
 
-    if (notesResponse.IsSuccessStatusCode)
-    {
-        var notesJson = await notesResponse.Content.ReadAsStringAsync();
-        notes = JsonConvert.DeserializeObject<List<PatientNoteViewModel>>(notesJson)
-                ?? new List<PatientNoteViewModel>();
-    }
-
-    // 3. Construire le ViewModel
-    var viewModel = new PatientDetailsViewModel
+        // 3. Construire le ViewModel
+        var viewModel = new PatientDetailsViewModel
     {
         Patient = patient,
         Notes = notes
