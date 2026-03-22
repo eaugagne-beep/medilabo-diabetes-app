@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AssessmentService.API/AssessmentService.API.csproj" />
+  <Project Path="AssessmentService.Application/AssessmentService.Application.csproj" />
+  <Project Path="AssessmentService.Domain/AssessmentService.Domain.csproj" />
+  <Project Path="AssessmentService.Infrastructure/AssessmentService.Infrastructure.csproj" />
+</Solution>
