@@ -31,23 +31,24 @@ public class PatientsController : Controller
     }
 
     public async Task<IActionResult> Details(int id)
-{
-    // 1. Récupérer le patient (via Gateway)
-    var patientResponse = await _httpClient.GetAsync($"/patients/{id}");
-
-    if (!patientResponse.IsSuccessStatusCode)
     {
-        return NotFound();
-    }
+        // 1. Récupérer le patient via Gateway
+        var patientResponse = await _httpClient.GetAsync($"/patients/{id}");
 
-    var patientJson = await patientResponse.Content.ReadAsStringAsync();
-    var patient = JsonConvert.DeserializeObject<PatientViewModel>(patientJson);
+        if (!patientResponse.IsSuccessStatusCode)
+        {
+            return NotFound();
+        }
 
-    if (patient == null)
-    {
-        return NotFound();
-    }
+        var patientJson = await patientResponse.Content.ReadAsStringAsync();
+        var patient = JsonConvert.DeserializeObject<PatientViewModel>(patientJson);
 
+        if (patient == null)
+        {
+            return NotFound();
+        }
+
+        // 2. Récupérer les notes via Gateway
         var notesResponse = await _httpClient.GetAsync($"/notes/patient/{id}");
 
         List<PatientNoteViewModel> notes = new();
@@ -59,13 +60,30 @@ public class PatientsController : Controller
                     ?? new List<PatientNoteViewModel>();
         }
 
-        // 3. Construire le ViewModel
-        var viewModel = new PatientDetailsViewModel
-    {
-        Patient = patient,
-        Notes = notes
-    };
+        // 3. Récupérer l'assessment directement
+        string riskLevel = "Unavailable";
 
-    return View(viewModel);
-}
+        var assessmentResponse = await _httpClient.GetAsync($"/assessment/{id}");
+
+        if (assessmentResponse.IsSuccessStatusCode)
+        {
+            var assessmentJson = await assessmentResponse.Content.ReadAsStringAsync();
+            var assessment = JsonConvert.DeserializeObject<AssessmentResultViewModel>(assessmentJson);
+
+            if (assessment != null)
+            {
+                riskLevel = assessment.RiskLevel;
+            }
+        }
+
+        // 4. Construire le ViewModel complet
+        var viewModel = new PatientDetailsViewModel
+        {
+            Patient = patient,
+            Notes = notes,
+            RiskLevel = riskLevel
+        };
+
+        return View(viewModel);
+    }
 }

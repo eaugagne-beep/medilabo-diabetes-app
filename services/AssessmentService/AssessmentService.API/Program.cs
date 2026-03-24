@@ -1,6 +1,6 @@
 using AssessmentService.Application.Interfaces;
 using AssessmentService.Infrastructure.Clients;
-
+using AssessmentService.Application.Services;
 
 
 
@@ -23,6 +23,7 @@ builder.Services.AddHttpClient<INoteServiceClient, NoteServiceClient>(client =>
     client.BaseAddress = new Uri("http://localhost:5148");
 });
 
+builder.Services.AddScoped<IAssessmentService, AssessmentAppService>();
 
 var app = builder.Build();
 
