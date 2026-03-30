@@ -11,7 +11,7 @@ public class PatientsController : Controller
     public PatientsController()
     {
         _httpClient = new HttpClient();
-        _httpClient.BaseAddress = new Uri("http://localhost:5110");
+        _httpClient.BaseAddress = new Uri("http://gatewayservice:8080");
     }
 
     public async Task<IActionResult> Index()

@@ -15,12 +15,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddHttpClient<IPatientServiceClient, PatientServiceClient>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5261");
+    client.BaseAddress = new Uri("http://patientservice-api:8080");
 });
 
 builder.Services.AddHttpClient<INoteServiceClient, NoteServiceClient>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5148");
+    client.BaseAddress = new Uri("http://noteservice-api:8080");
 });
 
 builder.Services.AddScoped<IAssessmentService, AssessmentAppService>();

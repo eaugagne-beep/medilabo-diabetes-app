@@ -1,0 +1,102 @@
+
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Your_password123
+    ports:
+      - "1433:1433"
+    networks:
+      - medilabo-network
+
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - medilabo-network
+
+  patientservice-api:
+    build:
+      context: ./services/PatientService
+      dockerfile: PatientService.API/Dockerfile
+    container_name: patientservice-api
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PatientDb;User Id=sa;Password=Your_password123;TrustServerCertificate=True
+    ports:
+      - "5261:8080"
+    networks:
+      - medilabo-network
+
+  noteservice-api:
+    build:
+      context: ./services/NoteService
+      dockerfile: NoteService.API/Dockerfile
+    container_name: noteservice-api
+    depends_on:
+      - mongodb
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - MongoDbSettings__ConnectionString=mongodb://mongodb:27017
+      - MongoDbSettings__DatabaseName=NoteDb
+      - MongoDbSettings__CollectionName=Notes
+    ports:
+      - "5148:8080"
+    networks:
+      - medilabo-network
+
+  assessmentservice-api:
+    build:
+      context: ./services/AssessmentService
+      dockerfile: AssessmentService.API/Dockerfile
+    container_name: assessmentservice-api
+    depends_on:
+      - patientservice-api
+      - noteservice-api
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5027:8080"
+    networks:
+      - medilabo-network
+
+  gatewayservice:
+    build:
+      context: ./services/GatewayService
+      dockerfile: Dockerfile
+    container_name: gatewayservice
+    depends_on:
+      - patientservice-api
+      - noteservice-api
+      - assessmentservice-api
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5110:8080"
+    networks:
+      - medilabo-network
+
+  patientfront:
+    build:
+      context: ./services/PatientFront
+      dockerfile: Dockerfile
+    container_name: patientfront
+    depends_on:
+      - gatewayservice
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "5125:8080"
+    networks:
+      - medilabo-network
+
+networks:
+  medilabo-network:
+    driver: bridge
