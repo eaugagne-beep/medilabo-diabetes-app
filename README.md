@@ -57,5 +57,44 @@ L’application est composée de plusieurs microservices :
 
 ### Commande
 
-```bash
+
 docker compose up --build
+
+---
+
+## 🌱 Green Code
+
+### Objectif
+
+Le Green Code vise à réduire l’impact environnemental du logiciel en limitant la consommation de ressources (CPU, mémoire, réseau) et en évitant les traitements inutiles.
+
+---
+
+### Enjeux identifiés dans le projet
+
+- Multiplication des appels entre microservices (réseau)
+- Absence de cache (recalculs inutiles)
+- Chargement complet des données (notes)
+- Logs non optimisés en production
+- Images Docker non optimisées
+- Absence de pagination
+
+---
+
+### Recommandations d’amélioration
+
+- Mettre en place un cache pour éviter les appels répétés
+- Réduire les appels entre microservices
+- Implémenter la pagination pour limiter la mémoire
+- Réduire la taille des réponses API
+- Désactiver les logs inutiles en production
+- Optimiser les images Docker (multi-stage build)
+- Réutiliser les HttpClient pour éviter les allocations
+- Éviter les traitements inutiles côté backend
+
+---
+
+### Point de vigilance
+
+L’architecture microservices augmente naturellement les échanges réseau.  
+Il est donc essentiel d’optimiser les appels entre services.
