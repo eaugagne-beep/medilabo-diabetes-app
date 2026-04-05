@@ -10,7 +10,10 @@
         }
       ],
       "UpstreamPathTemplate": "/patients",
-      "UpstreamHttpMethod": [ "GET", "POST" ]
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "AddHeadersToRequest": {
+        "Authorization": "{Authorization}"
+      }
     },
     {
       "DownstreamPathTemplate": "/api/Patients/{id}",
@@ -22,7 +25,10 @@
         }
       ],
       "UpstreamPathTemplate": "/patients/{id}",
-      "UpstreamHttpMethod": [ "GET", "PUT" ]
+      "UpstreamHttpMethod": [ "GET", "PUT" ],
+      "AddHeadersToRequest": {
+        "Authorization": "{Authorization}"
+      }
     },
     {
       "DownstreamPathTemplate": "/api/Notes/patient/{id}",
@@ -34,7 +40,10 @@
         }
       ],
       "UpstreamPathTemplate": "/notes/patient/{id}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "AddHeadersToRequest": {
+        "Authorization": "{Authorization}"
+      }
     },
     {
       "DownstreamPathTemplate": "/api/Notes",
@@ -46,7 +55,10 @@
         }
       ],
       "UpstreamPathTemplate": "/notes",
-      "UpstreamHttpMethod": [ "POST" ]
+      "UpstreamHttpMethod": [ "POST" ],
+      "AddHeadersToRequest": {
+        "Authorization": "{Authorization}"
+      }
     },
     {
       "DownstreamPathTemplate": "/api/Assessment/{id}",
@@ -58,7 +70,10 @@
         }
       ],
       "UpstreamPathTemplate": "/assessment/{id}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": [ "GET" ],
+      "AddHeadersToRequest": {
+        "Authorization": "{Authorization}"
+      }
     }
   ],
   "GlobalConfiguration": {

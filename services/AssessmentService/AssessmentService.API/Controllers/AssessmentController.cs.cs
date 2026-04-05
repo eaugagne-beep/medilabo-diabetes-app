@@ -1,9 +1,11 @@
 ﻿using AssessmentService.Application.DTOs;
 using AssessmentService.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AssessmentService.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class AssessmentController : ControllerBase

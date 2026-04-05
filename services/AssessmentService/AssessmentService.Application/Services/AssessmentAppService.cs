@@ -6,9 +6,7 @@ namespace AssessmentService.Application.Services;
 
 public class AssessmentAppService : IAssessmentService
 {
-    private readonly IPatientServiceClient _patientServiceClient;
-    private readonly INoteServiceClient _noteServiceClient;
-
+    // Liste des termes déclencheurs à rechercher dans les notes du patient
     private static readonly string[] TriggerTerms =
     {
         "hémoglobine a1c",
@@ -25,6 +23,10 @@ public class AssessmentAppService : IAssessmentService
         "anticorps"
     };
 
+    private readonly IPatientServiceClient _patientServiceClient;
+    private readonly INoteServiceClient _noteServiceClient;
+
+    
     public AssessmentAppService(
         IPatientServiceClient patientServiceClient,
         INoteServiceClient noteServiceClient)
@@ -33,11 +35,12 @@ public class AssessmentAppService : IAssessmentService
         _noteServiceClient = noteServiceClient;
     }
 
+    // Méthode principale pour évaluer le risque du patient
     public async Task<AssessmentResultDto> AssessRiskAsync(int patientId)
     {
         var patient = await _patientServiceClient.GetPatientByIdAsync(patientId);
 
-        if (patient == null)
+        if (patient is null)
         {
             return new AssessmentResultDto
             {
@@ -47,10 +50,8 @@ public class AssessmentAppService : IAssessmentService
         }
 
         var notes = await _noteServiceClient.GetNotesByPatientIdAsync(patientId);
-
         var age = CalculateAge(patient.DateOfBirth);
         var triggerCount = CountTriggerTerms(notes);
-
         var riskLevel = DetermineRiskLevel(age, patient.Gender, triggerCount);
 
         return new AssessmentResultDto
@@ -59,7 +60,8 @@ public class AssessmentAppService : IAssessmentService
             RiskLevel = riskLevel
         };
     }
-
+   
+    // Calcul de l'âge du patient à partir de sa date de naissance
     private static int CalculateAge(DateTime dateOfBirth)
     {
         var today = DateTime.Today;
@@ -73,13 +75,14 @@ public class AssessmentAppService : IAssessmentService
         return age;
     }
 
+    // Comptage des termes déclencheurs dans les notes du patient
     private static int CountTriggerTerms(IEnumerable<PatientNoteInfo> notes)
     {
         var count = 0;
 
         foreach (var note in notes)
         {
-            var noteText = note.Note.ToLowerInvariant();
+            var noteText = (note.Note ?? string.Empty).ToLowerInvariant();
 
             foreach (var trigger in TriggerTerms)
             {
@@ -93,9 +96,10 @@ public class AssessmentAppService : IAssessmentService
         return count;
     }
 
-    private static string DetermineRiskLevel(int age, string gender, int triggerCount)
+    // Détermination du niveau de risque
+    private static string DetermineRiskLevel(int age, string? gender, int triggerCount)
     {
-        var normalizedGender = gender.Trim().ToUpperInvariant();
+        var normalizedGender = (gender ?? string.Empty).Trim().ToUpperInvariant();
 
         if (triggerCount == 0)
         {
@@ -106,7 +110,7 @@ public class AssessmentAppService : IAssessmentService
         {
             if (triggerCount >= 8)
             {
-                return "EarlyOnset"; 
+                return "EarlyOnset";
             }
 
             if (triggerCount >= 6)
@@ -114,12 +118,7 @@ public class AssessmentAppService : IAssessmentService
                 return "InDanger";
             }
 
-            if (triggerCount >= 2)
-            {
-                return "Borderline";
-            }
-
-            return "None";
+            return triggerCount >= 2 ? "Borderline" : "None";
         }
 
         if (normalizedGender == "M")
@@ -129,12 +128,7 @@ public class AssessmentAppService : IAssessmentService
                 return "EarlyOnset";
             }
 
-            if (triggerCount >= 3)
-            {
-                return "InDanger";
-            }
-
-            return "None";
+            return triggerCount >= 3 ? "InDanger" : "None";
         }
 
         if (normalizedGender == "F")
@@ -144,12 +138,7 @@ public class AssessmentAppService : IAssessmentService
                 return "EarlyOnset";
             }
 
-            if (triggerCount >= 4)
-            {
-                return "InDanger";
-            }
-
-            return "None";
+            return triggerCount >= 4 ? "InDanger" : "None";
         }
 
         return "None";

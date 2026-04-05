@@ -8,11 +8,13 @@ public class PatientNoteAppService : IPatientNoteService
 {
     private readonly IPatientNoteRepository _patientNoteRepository;
 
+    // Injection du repository de notes de patients
     public PatientNoteAppService(IPatientNoteRepository patientNoteRepository)
     {
         _patientNoteRepository = patientNoteRepository;
     }
 
+    // Récupération des notes d'un patient par son ID
     public async Task<IEnumerable<PatientNoteDto>> GetByPatientIdAsync(int patientId)
     {
         var notes = await _patientNoteRepository.GetByPatientIdAsync(patientId);
@@ -25,6 +27,7 @@ public class PatientNoteAppService : IPatientNoteService
         });
     }
 
+    // Ajout d'une nouvelle note pour un patient
     public async Task<PatientNoteDto> AddAsync(CreatePatientNoteDto createPatientNoteDto)
     {
         var patientNote = new PatientNote

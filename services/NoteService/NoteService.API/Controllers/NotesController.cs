@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using NoteService.Application.DTOs;
 using NoteService.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NoteService.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class NotesController : ControllerBase

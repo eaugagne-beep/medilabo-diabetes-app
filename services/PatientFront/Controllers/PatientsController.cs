@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using PatientFront.Models;
@@ -8,12 +10,22 @@ public class PatientsController : Controller
 {
     private readonly HttpClient _httpClient;
 
+    
     public PatientsController()
     {
-        _httpClient = new HttpClient();
-        _httpClient.BaseAddress = new Uri("http://gatewayservice:8080");
+        _httpClient = new HttpClient
+        {
+            BaseAddress = new Uri("http://gatewayservice:8080")
+        };
+
+        var credentials = Convert.ToBase64String(
+            Encoding.UTF8.GetBytes("admin:admin123"));
+
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Basic", credentials);
     }
 
+    // Action pour afficher la liste des patients
     public async Task<IActionResult> Index()
     {
         var response = await _httpClient.GetAsync("/patients");
@@ -25,14 +37,14 @@ public class PatientsController : Controller
 
         var json = await response.Content.ReadAsStringAsync();
         var patients = JsonConvert.DeserializeObject<List<PatientViewModel>>(json)
-                       ?? new List<PatientViewModel>();
+            ?? new List<PatientViewModel>();
 
         return View(patients);
     }
 
+    // Action pour afficher les détails d'un patient
     public async Task<IActionResult> Details(int id)
     {
-        // 1. Récupérer le patient via Gateway
         var patientResponse = await _httpClient.GetAsync($"/patients/{id}");
 
         if (!patientResponse.IsSuccessStatusCode)
@@ -43,40 +55,14 @@ public class PatientsController : Controller
         var patientJson = await patientResponse.Content.ReadAsStringAsync();
         var patient = JsonConvert.DeserializeObject<PatientViewModel>(patientJson);
 
-        if (patient == null)
+        if (patient is null)
         {
             return NotFound();
         }
 
-        // 2. Récupérer les notes via Gateway
-        var notesResponse = await _httpClient.GetAsync($"/notes/patient/{id}");
+        var notes = await GetPatientNotesAsync(id);
+        var riskLevel = await GetRiskLevelAsync(id);
 
-        List<PatientNoteViewModel> notes = new();
-
-        if (notesResponse.IsSuccessStatusCode)
-        {
-            var notesJson = await notesResponse.Content.ReadAsStringAsync();
-            notes = JsonConvert.DeserializeObject<List<PatientNoteViewModel>>(notesJson)
-                    ?? new List<PatientNoteViewModel>();
-        }
-
-        // 3. Récupérer l'assessment directement
-        string riskLevel = "Unavailable";
-
-        var assessmentResponse = await _httpClient.GetAsync($"/assessment/{id}");
-
-        if (assessmentResponse.IsSuccessStatusCode)
-        {
-            var assessmentJson = await assessmentResponse.Content.ReadAsStringAsync();
-            var assessment = JsonConvert.DeserializeObject<AssessmentResultViewModel>(assessmentJson);
-
-            if (assessment != null)
-            {
-                riskLevel = assessment.RiskLevel;
-            }
-        }
-
-        // 4. Construire le ViewModel complet
         var viewModel = new PatientDetailsViewModel
         {
             Patient = patient,
@@ -85,5 +71,37 @@ public class PatientsController : Controller
         };
 
         return View(viewModel);
+    }
+
+    // Méthodes pour récupérer les notes et le niveau de risque
+    private async Task<List<PatientNoteViewModel>> GetPatientNotesAsync(int patientId)
+    {
+        var response = await _httpClient.GetAsync($"/notes/patient/{patientId}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return new List<PatientNoteViewModel>();
+        }
+
+        var json = await response.Content.ReadAsStringAsync();
+
+        return JsonConvert.DeserializeObject<List<PatientNoteViewModel>>(json)
+            ?? new List<PatientNoteViewModel>();
+    }
+
+    // Méthode pour récupérer le niveau de risque
+    private async Task<string> GetRiskLevelAsync(int patientId)
+    {
+        var response = await _httpClient.GetAsync($"/assessment/{patientId}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return "Unavailable";
+        }
+
+        var json = await response.Content.ReadAsStringAsync();
+        var assessment = JsonConvert.DeserializeObject<AssessmentResultViewModel>(json);
+
+        return assessment?.RiskLevel ?? "Unavailable";
     }
 }

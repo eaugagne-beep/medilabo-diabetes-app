@@ -13,6 +13,7 @@ public class PatientAppService : IPatientService
         _patientRepository = patientRepository;
     }
 
+    // Méthode pour récupérer la liste de tous les patients
     public async Task<IEnumerable<PatientDto>> GetAllAsync()
     {
         var patients = await _patientRepository.GetAllAsync();
@@ -29,6 +30,7 @@ public class PatientAppService : IPatientService
         });
     }
 
+    // Méthode pour récupérer les détails d'un patient par son ID
     public async Task<PatientDto?> GetByIdAsync(int id)
     {
         var patient = await _patientRepository.GetByIdAsync(id);
@@ -48,6 +50,7 @@ public class PatientAppService : IPatientService
         };
     }
 
+    // Méthode pour ajouter un nouveau patient
     public async Task<PatientDto> AddAsync(CreatePatientDto createPatientDto)
     {
         var patient = new Patient
@@ -74,6 +77,7 @@ public class PatientAppService : IPatientService
         };
     }
 
+    // Méthode pour mettre à jour les informations d'un patient existant
     public async Task<bool> UpdateAsync(int id, UpdatePatientDto updatePatientDto)
     {
         var existingPatient = await _patientRepository.GetByIdAsync(id);

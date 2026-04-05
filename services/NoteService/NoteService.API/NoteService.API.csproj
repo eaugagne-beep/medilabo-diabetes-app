@@ -7,13 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.5" />
+    <ProjectReference Include="..\NoteService.Application\NoteService.Application.csproj" />
+    <ProjectReference Include="..\NoteService.Infrastructure\NoteService.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NoteService.Application\NoteService.Application.csproj" />
-    <ProjectReference Include="..\NoteService.Infrastructure\NoteService.Infrastructure.csproj" />
+    <PackageReference Include="Microsoft.OpenApi" Version="1.6.22" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
 </Project>
