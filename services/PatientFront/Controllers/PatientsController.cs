@@ -1,38 +1,49 @@
 using System.Net.Http.Headers;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using PatientFront.Models;
 
+
 namespace PatientFront.Controllers;
 
+[Authorize]
 public class PatientsController : Controller
 {
-    private readonly HttpClient _httpClient;
-
-    
-    public PatientsController()
+    private HttpClient CreateClientWithAuth()
     {
-        _httpClient = new HttpClient
+        var client = new HttpClient
         {
             BaseAddress = new Uri("http://gatewayservice:8080")
         };
 
-        var credentials = Convert.ToBase64String(
-            Encoding.UTF8.GetBytes("admin:admin123"));
+        var username = HttpContext.Session.GetString("BasicAuthUsername");
+        var password = HttpContext.Session.GetString("BasicAuthPassword");
 
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Basic", credentials);
+        if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
+        {
+            var credentials = Convert.ToBase64String(
+                Encoding.UTF8.GetBytes($"{username}:{password}"));
+
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Basic", credentials);
+        }
+
+        return client;
     }
+
 
     // Action pour afficher la liste des patients
     public async Task<IActionResult> Index()
     {
-        var response = await _httpClient.GetAsync("/patients");
+        var client = CreateClientWithAuth();
+        var response = await client.GetAsync("/patients");
 
         if (!response.IsSuccessStatusCode)
         {
-            return View(new List<PatientViewModel>());
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return Content($"Erreur API : {(int)response.StatusCode} - {response.StatusCode}\n{errorContent}");
         }
 
         var json = await response.Content.ReadAsStringAsync();
@@ -45,7 +56,8 @@ public class PatientsController : Controller
     // Action pour afficher les détails d'un patient
     public async Task<IActionResult> Details(int id)
     {
-        var patientResponse = await _httpClient.GetAsync($"/patients/{id}");
+        var client = CreateClientWithAuth();
+        var patientResponse = await client.GetAsync($"/patients/{id}");
 
         if (!patientResponse.IsSuccessStatusCode)
         {
@@ -76,7 +88,8 @@ public class PatientsController : Controller
     // Méthodes pour récupérer les notes et le niveau de risque
     private async Task<List<PatientNoteViewModel>> GetPatientNotesAsync(int patientId)
     {
-        var response = await _httpClient.GetAsync($"/notes/patient/{patientId}");
+        var client = CreateClientWithAuth();
+        var response = await client.GetAsync($"/notes/patient/{patientId}");
 
         if (!response.IsSuccessStatusCode)
         {
@@ -92,7 +105,8 @@ public class PatientsController : Controller
     // Méthode pour récupérer le niveau de risque
     private async Task<string> GetRiskLevelAsync(int patientId)
     {
-        var response = await _httpClient.GetAsync($"/assessment/{patientId}");
+        var client = CreateClientWithAuth();
+        var response = await client.GetAsync($"/assessment/{patientId}");
 
         if (!response.IsSuccessStatusCode)
         {

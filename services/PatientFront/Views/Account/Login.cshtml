@@ -1,0 +1,28 @@
+@model PatientFront.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Connexion";
+}
+
+<h2>Connexion</h2>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <p style="color:red;">@Model.ErrorMessage</p>
+}
+
+<form asp-action="Login" method="post">
+    <div>
+        <label asp-for="Username">Nom d'utilisateur</label>
+        <input asp-for="Username" />
+    </div>
+
+    <div style="margin-top:10px;">
+        <label asp-for="Password">Mot de passe</label>
+        <input asp-for="Password" type="password" />
+    </div>
+
+    <div style="margin-top:15px;">
+        <button type="submit">Se connecter</button>
+    </div>
+</form>
